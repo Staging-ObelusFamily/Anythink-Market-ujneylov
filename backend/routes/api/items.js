@@ -114,6 +114,8 @@ router.get("/feed", auth.required, function(req, res, next) {
       return res.sendStatus(401);
     }
 
+
+
     Promise.all([
       Item.find({ seller: { $in: user.following } })
         .limit(Number(limit))

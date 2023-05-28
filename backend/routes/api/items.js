@@ -8,7 +8,6 @@ var auth = require("../auth");
 const { sendEvent } = require("../../lib/event");
 
 const configuration = new Configuration({
-  organization: "org-8oNMZiYb6X1ufSv0VJnGY6mg",
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);

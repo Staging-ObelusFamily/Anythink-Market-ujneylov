@@ -155,12 +155,16 @@ router.post("/", auth.required, function(req, res, next) {
 
       item.seller = user;
       if (!req.body.item.image) {
-        const generatedImgRes = await openai.createImage({
-          prompt: req.body.item.title,
-          n: 1,
-          size: "256x256",
-        });
-        item.image = generatedImgRes.data.data[0].url;
+        try {
+          const generatedImgRes = await openai.createImage({
+            prompt: req.body.item.title,
+            n: 1,
+            size: "256x256",
+          });
+          item.image = generatedImgRes.data.data[0].url;
+        } catch (e) {
+          throw e;
+        }
       }
 
       return item.save().then(function() {

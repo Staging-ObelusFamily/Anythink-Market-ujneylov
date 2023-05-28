@@ -147,7 +147,7 @@ router.get("/feed", auth.required, function(req, res, next) {
 
 router.post("/", auth.required, function(req, res, next) {
   User.findById(req.payload.id)
-    .then(function(user) {
+    .then(async function(user) {
       if (!user) {
         return res.sendStatus(401);
       }
@@ -155,6 +155,14 @@ router.post("/", auth.required, function(req, res, next) {
       var item = new Item(req.body.item);
 
       item.seller = user;
+      if (!req.body.item.image) {
+        const generatedImg = await openai.Image.create(
+          prompt=req.body.item.title,
+          n=1,
+          size="256x256"
+        )
+        item.image = generatedImg['data'][0]['url'];
+      }
 
       return item.save().then(function() {
         sendEvent('item_created', { item: req.body.item })
@@ -180,7 +188,7 @@ router.get("/:item", auth.optional, function(req, res, next) {
 
 // update item
 router.put("/:item", auth.required, function(req, res, next) {
-  User.findById(req.payload.id).then(async function(user) {
+  User.findById(req.payload.id).then(function(user) {
     if (req.item.seller._id.toString() === req.payload.id.toString()) {
       if (typeof req.body.item.title !== "undefined") {
         req.item.title = req.body.item.title;
@@ -192,13 +200,6 @@ router.put("/:item", auth.required, function(req, res, next) {
 
       if (typeof req.body.item.image !== "undefined") {
         req.item.image = req.body.item.image;
-      } else {
-        const generatedImg = await openai.Image.create(
-          prompt=req.body.item.title,
-          n=1,
-          size="256x256"
-        )
-        req.item.image = generatedImg['data'][0]['url'];
       }
 
       if (typeof req.body.item.tagList !== "undefined") {
